@@ -62,13 +62,21 @@ To demonstrate this step, I will describe how I apply the distortion correction 
 
 I used a combination of color and gradient thresholds to generate a binary image 
 ```python
-    ksize = 15
+def apply_threshold(img, s_thresh=(20, 255), sx_thresh=(10, 255)):
+    l_thresh = (225, 255)
+    
+    
+    ksize = 5
     img = np.copy(img)
     # Convert to HSV color space and separate the V channel
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HLS).astype(np.float)
     h_channel = hsv[:,:,0]
     l_channel = hsv[:,:,1]
     s_channel = hsv[:,:,2]
+    
+    lab = cv2.cvtColor(img, cv2.COLOR_BGR2Lab).astype(np.float)
+    b_channel = lab[:,:,2] 
+    
     # Sobel x
     sobelx = cv2.Sobel(l_channel, cv2.CV_64F, 1, 0, ksize, ) # Take the derivative in x
     abs_sobelx = np.absolute(sobelx) # Absolute x derivative to accentuate lines away from horizontal
@@ -115,8 +123,12 @@ I used a combination of color and gradient thresholds to generate a binary image
     
     detect = np.zeros_like(s_channel)
     # Yellow or White
-    detect[( ((yellow == 1) & (s_binary == 1)) | (( white == 1 ) & (sxbinary == 1)) |
-           ((gradx == 0) & (grady == 0) & ((mag_binary == 1) & (dir_binary == 1))) )] = 1
+    detect[( ((yellow == 1) & (s_binary == 1)) | (( white == 1 ) & (sxbinary == 1)) )] = 1
+    color_binary = detect
+    
+    
+    return color_binary
+
 ```
 
 
@@ -190,7 +202,7 @@ def measure_curvature(self, ploty, leftx, rightx):
 
     # Define conversions in x and y from pixels space to meters
     ym_per_pix = 30/720 # meters per pixel in y dimension
-    xm_per_pix = 3.7/700 # meters per pixel in x dimension
+    xm_per_pix = 3.7/900 # meters per pixel in x dimension
 
     # Fit new polynomials to x,y in world space
     left_fit_cr = np.polyfit(ploty*ym_per_pix, leftx*xm_per_pix, 2)
@@ -245,7 +257,7 @@ def draw_lanes_on_image(self, image, warped, ploty, left_fit, right_fit, Minv):
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](https://www.youtube.com/watch?v=-8XL7lEfBA4)
+Here's a [link to my video result](https://youtu.be/kR2CiKvoFP4)
 
 ---
 
